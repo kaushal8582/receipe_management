@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import AdminNav from "../component/AdminNav";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -9,9 +10,14 @@ const UserList = () => {
       alert("User Id is not provided");
       return;
     }
+    const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
-        `http://localhost:4000/admin/ban-user/${userId}`
+        `http://localhost:4000/admin/ban-user/${userId}`,{
+          headers: {
+            Authorization: token,
+          } 
+        }
       );
 
       if (response.status === 200) {
@@ -20,18 +26,26 @@ const UserList = () => {
         getAllUserInfo();
       }
     } catch (error) {
+      if(error.response.data.message=="you can't ban admin"){
+        alert("you can't ban admin")
+      }
       console.log(error);
     }
   };
 
   const handleUnBanClick = async(userId) => {
+    const token = localStorage.getItem("token");
     if (!userId) {
         alert("User Id is not provided");
         return;
       }
       try {
         const response = await axios.get(
-          `http://localhost:4000/admin/unban-user/${userId}`
+          `http://localhost:4000/admin/unban-user/${userId}`,{
+            headers: {
+              Authorization: token,
+            }
+          }
         );
   
         if (response.status === 200) {
@@ -45,9 +59,14 @@ const UserList = () => {
   };
 
   async function getAllUserInfo() {
+    const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
-        "http://localhost:4000/admin/get-all-user"
+        "http://localhost:4000/admin/get-all-user",{
+          headers: {
+            Authorization: token,
+          }
+        }
       );
 
       if (response.status === 200) {
@@ -64,7 +83,10 @@ const UserList = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div>
+       <AdminNav/>
+      <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Admin Dashboard</h1>
       <h2 className="text-2xl font-bold mb-6 text-gray-800">User Management</h2>
       <div className="space-y-4">
         {users.map((user) => (
@@ -117,6 +139,7 @@ const UserList = () => {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 };
